@@ -18,13 +18,13 @@ export class App extends Component {
     selectedImage: null,
     isLoading: false,
     error: null,
-    modalShown: false,
+    modal: { isOpen: false, visibleData: null },
   };
 
   onSubmitForm = e => {
     e.preventDefault();
 
-    this.setState(state => ({ page: 1}));
+    this.setState(state => ({ page: 1 }));
     const inputValue = e.target.elements[1].value;
 
     if (inputValue === '') {
@@ -44,14 +44,27 @@ export class App extends Component {
     this.setState(state => ({ selectedImage: imageId }));
   };
 
+  onOpenModal = data => {
+    this.setState(state => ({
+      modal: { isOpen: true, visibleData: data },
+    }));
+  };
+
+  onCloseModal = () => {
+    this.setState(state => ({ modal: { isOpen: false, visibleData: null }, selectedImage: null }));
+  };
+
   async componentDidUpdate(prevProps, prevState) {
     if (
       prevState.searchQuery !== this.state.searchQuery ||
       prevState.page !== this.state.page
     ) {
+      if (this.state.searchQuery === "") { 
+        return;
+      }
       try {
         this.setState(state => ({ isLoading: true }));
-        const { hits, totalHits} = await fetchImages(
+        const { hits, totalHits } = await fetchImages(
           this.state.searchQuery,
           this.state.page
         );
@@ -59,21 +72,33 @@ export class App extends Component {
         if (this.state.page === 1) {
           this.setState(state => ({ images: [...hits], totalHits }));
         } else {
-          this.setState(state => ({ images: [...state.images, ...hits], totalHits }));
-        }
-        
-        if (this.state.page < Math.ceil(totalHits / 12)) { 
-          this.setState(state => ({}))
+          this.setState(state => ({
+            images: [...state.images, ...hits],
+            totalHits,
+          }));
         }
 
         if (hits.length === 0) {
-            alert("Oops! We didn't find any image on this query. Please try another one...")
+          alert(
+            "Oops! We didn't find any image on this query. Please try another one..."
+            );
+            this.setState(state => ({ searchQuery: "" }));
         }
       } catch (error) {
         this.setState(state => ({ error: error.message }));
       } finally {
-        this.setState(state => ({ isLoading: false}));
+        this.setState(state => ({ isLoading: false }));
       }
+    }
+
+    if (prevState.selectedImage !== this.state.selectedImage) {
+      if (this.state.selectedImage === null) { 
+        return;
+      }
+      const largeImage = this.state.images.find(
+        el => el.id === this.state.selectedImage
+      );
+      this.onOpenModal(largeImage);
     }
   }
 
@@ -95,10 +120,15 @@ export class App extends Component {
           />
         )}
         {this.state.isLoading && this.state.images.length > 0 && <Loader />}
-        {this.state.page < Math.ceil(this.state.totalHits / 12) && (
+        {this.state.images.length > 0 && this.state.page < Math.ceil(this.state.totalHits / 12) && (
           <Button onBtnClick={this.onLoadMoreBtnClick} />
         )}
-        {this.state.modalShown && <Modal />}
+        {this.state.modal.isOpen && (
+          <Modal
+            modalData={this.state.modal.visibleData}
+            onCloseModal={this.onCloseModal}
+          />
+        )}
       </div>
     );
   }

@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 import css from './Searchbar.module.css';
 
 const Searchbar = ({ onSubmitForm }) => {
@@ -8,7 +10,7 @@ const Searchbar = ({ onSubmitForm }) => {
           <span className={css.searchFormButtonLabel}>Search</span>
         </button>
 
-        <input 
+        <input
           className={css.searchFormInput}
           type="text"
           autoComplete="off"
@@ -21,3 +23,7 @@ const Searchbar = ({ onSubmitForm }) => {
 };
 
 export default Searchbar;
+
+Searchbar.propTypes = {
+  onSubmitForm: PropTypes.func.isRequired,
+};

@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 import css from './ImageGalleryItem.module.css';
 
 const ImageGalleryItem = ({ image, selectImg }) => {
@@ -10,3 +12,8 @@ const ImageGalleryItem = ({ image, selectImg }) => {
 };
 
 export default ImageGalleryItem;
+
+ImageGalleryItem.propTypes = {
+  image: PropTypes.object.isRequired,
+  selectImg: PropTypes.func.isRequired,
+};
