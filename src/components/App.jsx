@@ -28,7 +28,7 @@ export class App extends Component {
     const inputValue = e.target.elements[1].value;
 
     if (inputValue === '') {
-      this.setState(state => ({ images: [] }));
+      this.setState(state => ({ images: [], searchQuery: "" }));
       return alert('Please enter what images do you want to find?');
     }
 
